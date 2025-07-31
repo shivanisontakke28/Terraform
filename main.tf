@@ -20,4 +20,24 @@ resource "aws_instance" "app_server" {
     tags = {
         Name = "Terraform-Demo"
     }
+
+    resource "aws_lb" "test_lb" {
+        name               = "test-lb-tf"
+        internal           = false
+        load_balancer_type = "application"
+        security_group     = [aws_security_group.lb_sg.id]
+        subnets            = [for subnet in aws_subnet.public : subnet.id]
+
+        enable_deletion_protection = true
+
+        access_logd {
+            bucket  = aws_s3_bucket.lb_logs.bucket
+            prefix  = "test_lb"
+            enabled = true
+        }
+
+        tags = {
+            Environment = "production" 
+        }
+    }
 }
